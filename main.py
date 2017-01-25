@@ -15,10 +15,15 @@
 # limitations under the License.
 #
 import webapp2
+import re
 
-def build_page():
+ USER_RE = re.compile(r"^[a-zA-Z0-9_-]{3,20}$")
+ def valid_username(username):
+     return USER_RE.match(username)
+
+def build_page(usr_res):
     user_label = "<label>Username</label>"
-    user_input = "<input type='text' name='user'/>"
+    user_input = "<input type='text' name='usr'/>" + usr_res
 
     pw_label = "<label>Password</label>"
     pw_input = "<input type='password' name = 'pwd'/>"
@@ -31,18 +36,28 @@ def build_page():
 
     submit = "<input type='submit'/>"
 
-    form = (user_label + user_input + "<br>" +
+    form = ("<form method='post'>" + user_label + user_input + "<br>" +
             pw_label + pw_input + "<br>" +
             ver_label + ver_input + "<br>" +
             email_label + email_input + "<br>" +
-            submit)
+            submit + "</form>")
 
     return form
 
+def user_res():
+    msg = "That isn't a valid username!"
+    if " " in 'usr':
+        return msg
+
 class MainHandler(webapp2.RequestHandler):
     def get(self):
-        content = build_page()
+        content = build_page("")
         self.response.write(content)
+
+    def post(self):
+        new_user = self.request.get('usr')
+        content = build_page(usr_res)
+        self.response.write(new_user)
 
 app = webapp2.WSGIApplication([
     ('/', MainHandler)
