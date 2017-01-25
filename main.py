@@ -17,22 +17,30 @@
 import webapp2
 import re
 
- USER_RE = re.compile(r"^[a-zA-Z0-9_-]{3,20}$")
- def valid_username(username):
-     return USER_RE.match(username)
+USER_RE = re.compile(r"^[a-zA-Z0-9_-]{3,20}$")
+def valid_username(username):
+    return username and USER_RE.match(username)
 
-def build_page(usr_res):
+PASS_RE = re.compile(r"^.{3,20}$")
+def valid_password(password):
+    return password and PASS_RE.match(password)
+
+EMAIL_RE  = re.compile(r'^[\S]+@[\S]+\.[\S]+$')
+def valid_email(email):
+    return not email or EMAIL_RE.match(email)
+
+def build_page(username_error, password_error, verify_error, email_error):
     user_label = "<label>Username</label>"
-    user_input = "<input type='text' name='usr'/>" + usr_res
+    user_input = "<input type='text' name='username'/>" + username_error
 
     pw_label = "<label>Password</label>"
-    pw_input = "<input type='password' name = 'pwd'/>"
+    pw_input = "<input type='password' name='password'/>" + password_error
 
     ver_label = "<label>Verify Password</label>"
-    ver_input = "<input type='password' name = 'ver'/>"
+    ver_input = "<input type='password' name='verify'/>" + verify_error
 
     email_label = "<label>Email (optional)</label>"
-    email_input = "<input type='email' name='usremail'/>"
+    email_input = "<input type='email' name='email'/>" + email_error
 
     submit = "<input type='submit'/>"
 
@@ -44,20 +52,49 @@ def build_page(usr_res):
 
     return form
 
-def user_res():
-    msg = "That isn't a valid username!"
-    if " " in 'usr':
-        return msg
-
 class MainHandler(webapp2.RequestHandler):
     def get(self):
-        content = build_page("")
+        content = build_page("", "", "", "")
         self.response.write(content)
 
     def post(self):
-        new_user = self.request.get('usr')
-        content = build_page(usr_res)
-        self.response.write(new_user)
+        error = False
+        username = self.request.get('username')
+        password = self.request.get('password')
+        verify = self.request.get('verify')
+        email = self.request.get('email')
+
+
+        if not valid_username(username):
+            username_error = "That's not a valid username."
+            error = True
+        else:
+            username_error = ""
+
+        if not valid_password(password):
+            password_error = "That's not a valid password."
+            error = True
+        else:
+            password_error = ""
+
+        if password != verify:
+            verify_error = "Your passwords don't match."
+            error = True
+        else:
+            verify_error = ""
+
+        if not valid_email(email):
+            email_error = "That's not a valid email."
+            error = True
+        else:
+            email_error = ""
+
+        content = build_page(username_error, password_error, verify_error, email_error)
+
+        if error:
+            self.response.write(content)
+        else:
+            self.response.write("Welcome" + username)
 
 app = webapp2.WSGIApplication([
     ('/', MainHandler)
