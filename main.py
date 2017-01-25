@@ -94,12 +94,12 @@ class MainHandler(webapp2.RequestHandler):
         if error:
             self.response.write(content)
         else:
-            self.redirect('/welcome', 'username')
+            self.redirect('/welcome?username=' + username)
 
 class Welcome(webapp2.RequestHandler):
     def get(self):
         username = self.request.get('username')
-        self.response.write("Welcome, " + username)
+        self.response.write("Welcome, " + username + "!")
 
 app = webapp2.WSGIApplication([
     ('/', MainHandler),
