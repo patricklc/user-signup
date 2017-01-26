@@ -29,9 +29,11 @@ EMAIL_RE  = re.compile(r'^[\S]+@[\S]+\.[\S]+$')
 def valid_email(email):
     return not email or EMAIL_RE.match(email)
 
-def build_page(username_error, password_error, verify_error, email_error):
+def build_page(username_error, password_error, verify_error, email_error, username, email):
+    header = "<h1>Signup</h1>"
+
     user_label = "<label>Username</label>"
-    user_input = "<input type='text' name='username'/>" + username_error
+    user_input = "<input type='text' name='username' value='%s'/>" % username + username_error
 
     pw_label = "<label>Password</label>"
     pw_input = "<input type='password' name='password'/>" + password_error
@@ -40,7 +42,7 @@ def build_page(username_error, password_error, verify_error, email_error):
     ver_input = "<input type='password' name='verify'/>" + verify_error
 
     email_label = "<label>Email (optional)</label>"
-    email_input = "<input type='email' name='email'/>" + email_error
+    email_input = "<input type='email' name='email' value='%s'/>" % email + email_error
 
     submit = "<input type='submit'/>"
 
@@ -50,11 +52,11 @@ def build_page(username_error, password_error, verify_error, email_error):
             email_label + email_input + "<br>" +
             submit + "</form>")
 
-    return form
+    return header + form
 
 class MainHandler(webapp2.RequestHandler):
     def get(self):
-        content = build_page("", "", "", "")
+        content = build_page("", "", "", "", "", "")
         self.response.write(content)
 
     def post(self):
@@ -89,7 +91,7 @@ class MainHandler(webapp2.RequestHandler):
         else:
             email_error = ""
 
-        content = build_page(username_error, password_error, verify_error, email_error)
+        content = build_page(username_error, password_error, verify_error, email_error, username, email)
 
         if error:
             self.response.write(content)
